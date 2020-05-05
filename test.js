@@ -1,8 +1,9 @@
 const DottedMap = require('./index.js');
 
-const map = new DottedMap({ height: 100, countries: ['FRA'] });
+const map = new DottedMap({ height: 100, grid: 'diagonal' });
 
-map.addPin({ lat: 48.85, lng: 2.35, svgOptions: { color: 'red', radius: 0.45 } });
-// map.addPin({ lat: 47.65, lng: -2.76, svgOptions: { color: 'red', radius: 0.5 } });
+const pinColor = '#D6FF79';
 
-console.log(map.getSVG({ radius: 0.3, color: 'grey' }));
+map.addPin({ lat: 48.85, lng: 2.35, svgOptions: { color: pinColor, radius: 0.22 } });
+
+console.log(map.getSVG({ radius: 0.22, color: '#423B38', shape: 'circle', backgroundColor: '020300' }));

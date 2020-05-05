@@ -6,8 +6,9 @@
 const map = new DottedMap({
   height,
   width, // (one of both if enough)
-  countries: ['FRA', 'DEU'] // if not present, whole world is used
+  countries: ['FRA', { id: 'DEU', svgOptions: { color: 'blue' } }] // if not present, whole world is used
   region: { lat: {min, max}, lng: {min, max} }, // if not present, it fits the countries or the world
+  grid: 'vertical' | 'diagonal',
 })
 
 // → it will cache the points array

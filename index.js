@@ -9,7 +9,7 @@ const geojsonByCountry = geojsonWorld.features.reduce((countries, feature) => {
 }, {});
 
 const DEFAULT_WORLD_REGION = {
-  lat: { min: -65, max: 78 },
+  lat: { min: -56, max: 71 },
   lng: { min: -179, max: 179 },
 };
 
@@ -51,7 +51,7 @@ const computeGeojsonBox = (geojson) => {
   }
 };
 
-function DottedMap({ height = 0, width = 0, countries = [], region }) {
+function DottedMap({ height = 0, width = 0, countries = [], region, grid = 'vertocam' }) {
   if (height <= 0 && width <= 0) {
     throw new Error('height or width is required');
   }
@@ -82,33 +82,66 @@ function DottedMap({ height = 0, width = 0, countries = [], region }) {
 
   const points = {};
 
-  for (let x = 0; x < width; x += 1) {
-    for (let y = 0; y < height; y += 1) {
-      const pointGoogle = [(x / width) * X_RANGE + X_MIN, Y_MAX - (y / height) * Y_RANGE];
+  const ystep = grid === 'diagonal' ? Math.sqrt(3) / 2 : 1;
+
+  for (let y = 0; y * ystep < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const localx = y % 2 === 0 && grid === 'diagonal' ? x + 0.5 : x;
+      const localy = y * ystep;
+
+      const pointGoogle = [(localx / width) * X_RANGE + X_MIN, Y_MAX - (localy / height) * Y_RANGE];
       const wgs84Point = proj4(proj4.defs('GOOGLE'), proj4.defs('WGS84'), pointGoogle);
+
       if (inside.feature(geojson, wgs84Point) !== -1) {
-        points[[x, y].join(';')] = { x, y };
+        points[[x, y].join(';')] = { x: localx, y: localy };
       }
     }
   }
 
   return {
     addPin({ lat, lng, data, svgOptions }) {
-      const [rawX, rawY] = proj4(proj4.defs('GOOGLE'), [lng, lat]);
-      const [x, y] = [Math.round((width * (rawX - X_MIN)) / X_RANGE), Math.round((height * (Y_MAX - rawY)) / Y_RANGE)];
-      points[[x, y].join(';')] = { x, y, data, svgOptions };
+      const [googleX, googleY] = proj4(proj4.defs('GOOGLE'), [lng, lat]);
+      let [rawX, rawY] = [(width * (googleX - X_MIN)) / X_RANGE, (height * (Y_MAX - googleY)) / Y_RANGE];
+      const y = Math.round(rawY / ystep);
+      if (y % 2 === 0 && grid === 'diagonal') {
+        rawX -= 0.5;
+      }
+      const x = Math.round(rawX);
+      let [localx, localy] = [x, Math.round(y) * ystep];
+      if (y % 2 === 0 && grid === 'diagonal') {
+        localx += 0.5;
+      }
+
+      points[[x, y].join(';')] = { x: localx, y: localy, data, svgOptions };
     },
     getPoints() {
       return Object.values(points);
     },
-    getSVG({ shape, color = 'current', backgroundColor, radius = 0.5 }) {
-      return `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-        ${Object.values(points)
-          .map(
-            ({ x, y, svgOptions = {} }) =>
-              `<circle cx="${x}" cy="${y}" r="${svgOptions.radius || radius}" fill="${svgOptions.color || color}" />`,
-          )
-          .join('\n')}
+    getSVG({ shape = 'circle', color = 'current', backgroundColor = 'transparent', radius = 0.5 }) {
+      const getPoint = ({ x, y, svgOptions = {} }) => {
+        const pointRadius = svgOptions.radius || radius;
+        if (shape === 'circle') {
+          return `<circle cx="${x}" cy="${y}" r="${pointRadius}" fill="${svgOptions.color || color}" />`;
+        } else if (shape === 'hexagon') {
+          const sqrt3radius = Math.sqrt(3) * pointRadius;
+
+          const polyPoints = [
+            [x + sqrt3radius, y - pointRadius],
+            [x + sqrt3radius, y + pointRadius],
+            [x, y + 2 * pointRadius],
+            [x - sqrt3radius, y + pointRadius],
+            [x - sqrt3radius, y - pointRadius],
+            [x, y - 2 * pointRadius],
+          ];
+
+          return `<polyline points="${polyPoints.map((point) => point.join(',')).join(' ')}" fill="${
+            svgOptions.color || color
+          }" />`;
+        }
+      };
+
+      return `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="background-color: ${backgroundColor}">
+        ${Object.values(points).map(getPoint).join('\n')}
       </svg>`;
     },
   };
