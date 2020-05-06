@@ -7,6 +7,8 @@ const geojsonByCountry = geojsonWorld.features.reduce((countries, feature) => {
   return countries;
 }, {});
 
+const CACHE = {};
+
 const DEFAULT_WORLD_REGION = {
   lat: { min: -56, max: 71 },
   lng: { min: -179, max: 179 },
@@ -50,7 +52,7 @@ const computeGeojsonBox = (geojson) => {
   }
 };
 
-function DottedMap({ height = 0, width = 0, countries = [], region, grid = 'vertocam' }) {
+function DottedMap({ height = 0, width = 0, countries = [], region, grid = 'vertical' }) {
   if (height <= 0 && width <= 0) {
     throw new Error('height or width is required');
   }
@@ -68,6 +70,8 @@ function DottedMap({ height = 0, width = 0, countries = [], region, grid = 'vert
     region = DEFAULT_WORLD_REGION;
   }
 
+  const cacheKey = [JSON.stringify(region), grid, height, width, JSON.stringify(countries)].join(' ');
+
   const [X_MIN, Y_MIN] = proj4(proj4.defs('GOOGLE'), [region.lng.min, region.lat.min]);
   const [X_MAX, Y_MAX] = proj4(proj4.defs('GOOGLE'), [region.lng.max, region.lat.max]);
   const X_RANGE = X_MAX - X_MIN;
@@ -79,22 +83,25 @@ function DottedMap({ height = 0, width = 0, countries = [], region, grid = 'vert
     height = Math.round((width * Y_RANGE) / X_RANGE);
   }
 
-  const points = {};
-
+  const points = { ...CACHE[cacheKey] } || {};
   const ystep = grid === 'diagonal' ? Math.sqrt(3) / 2 : 1;
 
-  for (let y = 0; y * ystep < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      const localx = y % 2 === 0 && grid === 'diagonal' ? x + 0.5 : x;
-      const localy = y * ystep;
+  if (!CACHE[cacheKey]) {
+    for (let y = 0; y * ystep < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const localx = y % 2 === 0 && grid === 'diagonal' ? x + 0.5 : x;
+        const localy = y * ystep;
 
-      const pointGoogle = [(localx / width) * X_RANGE + X_MIN, Y_MAX - (localy / height) * Y_RANGE];
-      const wgs84Point = proj4(proj4.defs('GOOGLE'), proj4.defs('WGS84'), pointGoogle);
+        const pointGoogle = [(localx / width) * X_RANGE + X_MIN, Y_MAX - (localy / height) * Y_RANGE];
+        const wgs84Point = proj4(proj4.defs('GOOGLE'), proj4.defs('WGS84'), pointGoogle);
 
-      if (inside.feature(geojson, wgs84Point) !== -1) {
-        points[[x, y].join(';')] = { x: localx, y: localy };
+        if (inside.feature(geojson, wgs84Point) !== -1) {
+          points[[x, y].join(';')] = { x: localx, y: localy };
+        }
       }
     }
+
+    CACHE[cacheKey] = points;
   }
 
   return {
