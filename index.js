@@ -1,8 +1,7 @@
-const fs = require('fs');
 const proj4 = require('proj4');
 const inside = require('point-in-geopolygon');
+const geojsonWorld = require('./countries.geo.json');
 
-const geojsonWorld = JSON.parse(fs.readFileSync(__dirname + '/countries.geo.json', { encoding: 'utf8' }));
 const geojsonByCountry = geojsonWorld.features.reduce((countries, feature) => {
   countries[feature.id] = feature;
   return countries;
