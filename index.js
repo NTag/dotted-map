@@ -101,7 +101,7 @@ function DottedMap({ height = 0, width = 0, countries = [], region, grid = 'vert
       }
     }
 
-    CACHE[cacheKey] = points;
+    CACHE[cacheKey] = { ...points };
   }
 
   return {
