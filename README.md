@@ -3,13 +3,13 @@
 # dotted-map
 
 <div align="center">
-  <img src="images/world-vertical-circle-light.svg" width="100%" />
+  <img src="https://raw.githubusercontent.com/NTag/dotted-map/master/images/world-vertical-circle-light.svg" width="100%" />
 
-  <img src="images/world-diagonal-circle-dark.svg" width="100%" />
+  <img src="https://raw.githubusercontent.com/NTag/dotted-map/master/images/world-diagonal-circle-dark.svg" width="100%" />
 
-  <img src="images/france-diagonal-hexagon-light.svg" height="150px" />
-  <img src="images/italy-diagonal-hexagon-light.svg" height="150px" />
-  <img src="images/uk-diagonal-hexagon-light.svg" height="150px" />
+  <img src="https://raw.githubusercontent.com/NTag/dotted-map/master/images/france-diagonal-hexagon-light.svg" height="150px" />
+  <img src="https://raw.githubusercontent.com/NTag/dotted-map/master/images/italy-diagonal-hexagon-light.svg" height="150px" />
+  <img src="https://raw.githubusercontent.com/NTag/dotted-map/master/images/uk-diagonal-hexagon-light.svg" height="150px" />
   <br />
   <em>You can limit to one (or several) countries (France, Italy, UK)</em>
 </div>
@@ -28,19 +28,9 @@ npm i dotted-map
 const fs = require('fs');
 const DottedMap = require('dotted-map');
 
-const map = new DottedMap({ height: 100, grid: 'diagonal' });
+const map = new DottedMap({ height: 60, grid: 'diagonal' });
 
-const svgOptions = { color: '#d6ff79', radius: 0.22 };
-map.addPin({ lat: 40.73061, lng: -73.935242, svgOptions });
-map.addPin({ lat: -33.865143, lng: 151.2099, svgOptions });
-map.addPin({ lat: -23.533773, lng: -46.62529, svgOptions });
-map.addPin({ lat: 37.773972, lng: -122.431297, svgOptions });
-map.addPin({ lat: 52.520008, lng: 13.404954, svgOptions });
-map.addPin({ lat: 55.751244, lng: 37.618423, svgOptions });
-map.addPin({ lat: 35.652832, lng: 139.839478, svgOptions });
-map.addPin({ lat: 14.716677, lng: -17.467686, svgOptions });
-map.addPin({ lat: -33.918861, lng: 18.4233, svgOptions });
-map.addPin({ lat: -20.88231, lng: 55.4504, svgOptions });
+map.addPin({ lat: 40.73061, lng: -73.935242, svgOptions: { color: '#d6ff79', radius: 0.4 } });
 map.addPin({ lat: 48.8534, lng: 2.3488, svgOptions: { color: '#fffcf2', radius: 0.4 } });
 
 const svgMap = map.getSVG({ radius: 0.22, color: '#423B38', shape: 'circle', backgroundColor: '#020300' });
