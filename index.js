@@ -1,11 +1,20 @@
 const proj4 = require('proj4');
-const inside = require('point-in-geopolygon');
+const inside = require('@turf/boolean-point-in-polygon').default;
 const geojsonWorld = require('./countries.geo.json');
 
 const geojsonByCountry = geojsonWorld.features.reduce((countries, feature) => {
   countries[feature.id] = feature;
   return countries;
 }, {});
+
+const geojsonToMultiPolygons = (geojson) => {
+  const coordinates = geojson.features.reduce(
+    (poly, feature) =>
+      poly.concat(feature.geometry.type === 'Polygon' ? [feature.geometry.coordinates] : feature.geometry.coordinates),
+    [],
+  );
+  return { type: 'Feature', geometry: { type: 'MultiPolygon', coordinates } };
+};
 
 const CACHE = {};
 
@@ -70,6 +79,8 @@ function DottedMap({ height = 0, width = 0, countries = [], region, grid = 'vert
     region = DEFAULT_WORLD_REGION;
   }
 
+  const poly = geojsonToMultiPolygons(geojson);
+
   const cacheKey = [JSON.stringify(region), grid, height, width, JSON.stringify(countries)].join(' ');
 
   const [X_MIN, Y_MIN] = proj4(proj4.defs('GOOGLE'), [region.lng.min, region.lat.min]);
@@ -95,7 +106,7 @@ function DottedMap({ height = 0, width = 0, countries = [], region, grid = 'vert
         const pointGoogle = [(localx / width) * X_RANGE + X_MIN, Y_MAX - (localy / height) * Y_RANGE];
         const wgs84Point = proj4(proj4.defs('GOOGLE'), proj4.defs('WGS84'), pointGoogle);
 
-        if (inside.feature(geojson, wgs84Point) !== -1) {
+        if (inside(wgs84Point, poly)) {
           points[[x, y].join(';')] = { x: localx, y: localy };
         }
       }
