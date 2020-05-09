@@ -1,3 +1,4 @@
 images/
 test.js
 *.svg
+.prettierrc.json
