@@ -50,6 +50,7 @@ const map = new DottedMap({
   countries: ['FRA'] // look into `countries.geo.json` to see which keys to use. You can also omit this parameter and the whole world will be used
   region: { lat: { min, max }, lng: { min, max } }, // if not present, it will fit the countries (and if no country is specified, the whole world)
   grid: 'vertical' | 'diagonal', // how points should be aligned
+  avoidOuterPins: false | true, // if it's true, prevent adding pins when they are outside of region/countries
 });
 
 // Add some points/change the color of existing points

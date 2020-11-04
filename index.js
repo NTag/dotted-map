@@ -61,7 +61,7 @@ const computeGeojsonBox = (geojson) => {
   }
 };
 
-function DottedMap({ height = 0, width = 0, countries = [], region, grid = 'vertical' }) {
+function DottedMap({ height = 0, width = 0, countries = [], region, grid = 'vertical', avoidOuterPins = false }) {
   if (height <= 0 && width <= 0) {
     throw new Error('height or width is required');
   }
@@ -118,6 +118,10 @@ function DottedMap({ height = 0, width = 0, countries = [], region, grid = 'vert
   return {
     addPin({ lat, lng, data, svgOptions }) {
       const [googleX, googleY] = proj4(proj4.defs('GOOGLE'), [lng, lat]);
+      if (avoidOuterPins) {
+        const wgs84Point = proj4(proj4.defs('GOOGLE'), proj4.defs('WGS84'), [googleX, googleY])
+        if (!inside(wgs84Point, poly)) return;
+      }
       let [rawX, rawY] = [(width * (googleX - X_MIN)) / X_RANGE, (height * (Y_MAX - googleY)) / Y_RANGE];
       const y = Math.round(rawY / ystep);
       if (y % 2 === 0 && grid === 'diagonal') {
