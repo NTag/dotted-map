@@ -5,6 +5,7 @@ namespace DottedMapLib {
     countries?: string[];
     region?: { lat: { min: number; max: number }; lng: { min: number; max: number } };
     grid?: 'vertical' | 'diagonal';
+    avoidOuterPins?: false | true;
   }
 
   interface SvgOptions {
