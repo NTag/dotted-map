@@ -1,10 +1,11 @@
 {
   "name": "dotted-map",
-  "version": "1.3.0",
+  "version": "2.0.0",
   "description": "Create a SVG map filled with dots for the world or countries",
-  "main": "index.js",
+  "main": "dist/dotted-map.js",
+  "module": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack"
   },
   "keywords": [
     "map",
@@ -15,14 +16,16 @@
     "countries",
     "country"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "Basile Bruneau <basile@bruneau.email>",
+  "license": "MIT",
   "dependencies": {
     "@turf/boolean-point-in-polygon": "^6.0.1",
     "proj4": "^2.6.1"
   },
   "devDependencies": {
-    "prettier": "^2.0.5"
+    "prettier": "^2.0.5",
+    "webpack": "^5.33.2",
+    "webpack-cli": "^4.6.0"
   },
   "sideEffects": false
 }

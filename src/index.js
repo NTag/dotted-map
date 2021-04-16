@@ -1,6 +1,12 @@
-const proj4 = require('proj4');
-const inside = require('@turf/boolean-point-in-polygon').default;
-const geojsonWorld = require('./countries.geo.json');
+import proj4 from 'proj4';
+import inside from '@turf/boolean-point-in-polygon';
+import geojsonWorld from './countries.geo.json';
+
+// TODO
+// [ ] Handle prefill cache →
+//   [ ] Method to export a cache
+//   [ ] Method to import a cache
+// [ ] Make two exports: one with countries, one without (reduce bundle size)
 
 const geojsonByCountry = geojsonWorld.features.reduce((countries, feature) => {
   countries[feature.id] = feature;
@@ -119,7 +125,7 @@ function DottedMap({ height = 0, width = 0, countries = [], region, grid = 'vert
     addPin({ lat, lng, data, svgOptions }) {
       const [googleX, googleY] = proj4(proj4.defs('GOOGLE'), [lng, lat]);
       if (avoidOuterPins) {
-        const wgs84Point = proj4(proj4.defs('GOOGLE'), proj4.defs('WGS84'), [googleX, googleY])
+        const wgs84Point = proj4(proj4.defs('GOOGLE'), proj4.defs('WGS84'), [googleX, googleY]);
         if (!inside(wgs84Point, poly)) return;
       }
       let [rawX, rawY] = [(width * (googleX - X_MIN)) / X_RANGE, (height * (Y_MAX - googleY)) / Y_RANGE];
@@ -133,7 +139,11 @@ function DottedMap({ height = 0, width = 0, countries = [], region, grid = 'vert
         localx += 0.5;
       }
 
-      points[[x, y].join(';')] = { x: localx, y: localy, data, svgOptions };
+      const point = { x: localx, y: localy, data, svgOptions };
+
+      points[[x, y].join(';')] = point;
+
+      return point;
     },
     getPoints() {
       return Object.values(points);
@@ -165,7 +175,12 @@ function DottedMap({ height = 0, width = 0, countries = [], region, grid = 'vert
         ${Object.values(points).map(getPoint).join('\n')}
       </svg>`;
     },
+    image: {
+      region,
+      width,
+      height,
+    },
   };
 }
 
-module.exports = DottedMap;
+export default DottedMap;

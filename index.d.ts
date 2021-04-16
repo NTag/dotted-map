@@ -1,9 +1,14 @@
 namespace DottedMapLib {
+  interface Region {
+    lat: { min: number; max: number };
+    lng: { min: number; max: number };
+  }
+
   interface Settings {
     height?: number;
     width?: number;
     countries?: string[];
-    region?: { lat: { min: number; max: number }; lng: { min: number; max: number } };
+    region?: Region;
     grid?: 'vertical' | 'diagonal';
     avoidOuterPins?: false | true;
   }
@@ -38,7 +43,12 @@ namespace DottedMapLib {
 export default class DottedMap {
   constructor(settings: DottedMapLib.Settings);
 
-  addPin(pin: DottedMapLib.Pin): void;
+  addPin(pin: DottedMapLib.Pin): DottedMapLib.Point;
   getPoints(): DottedMapLib.Point[];
   getSVG(settings: DottedMapLib.SvgSettings): string;
+  image: {
+    region: DottedMap.Region;
+    width: number;
+    height: number;
+  };
 }
