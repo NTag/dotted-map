@@ -1,9 +1,13 @@
 {
   "name": "dotted-map",
-  "version": "2.0.0",
+  "version": "2.1.1",
   "description": "Create a SVG map filled with dots for the world or countries",
-  "main": "dist/dotted-map.js",
-  "module": "src/index.js",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./without-countries": "./without-countries.js"
+  },
+  "module": "./src/with-countries.js",
   "scripts": {
     "build": "webpack"
   },

@@ -1,4 +1,5 @@
 node_modules/
 test.js
 *.svg
-dist/
+/index.js
+/without-countries.js

@@ -1,18 +1,24 @@
-namespace DottedMapLib {
+namespace DottedMapWithoutCountriesLib {
   interface Region {
     lat: { min: number; max: number };
     lng: { min: number; max: number };
   }
 
-  interface MapSettings {
-    height?: number;
-    width?: number;
-    countries?: string[];
-    region?: Region;
-    grid?: 'vertical' | 'diagonal';
+  interface Map {
+    points: Point[];
+    X_MIN: number;
+    Y_MAX: number;
+    X_RANGE: number;
+    Y_RANGE: number;
+    region: Region;
+    grid: 'vertical' | 'diagonal';
+    width: number;
+    height: number;
+    ystep: number;
   }
 
   interface Settings extends MapSettings {
+    map: Map;
     avoidOuterPins?: false | true;
   }
 
@@ -43,14 +49,14 @@ namespace DottedMapLib {
   };
 }
 
-export const getMapJSON: (settings: DottedMapLib.MapSettings) => string;
+export default class DottedMapWithoutCountries {
+  constructor(settings: DottedMapWithoutCountriesLib.Settings);
 
-export default class DottedMap {
-  constructor(settings: DottedMapLib.Settings);
-
-  addPin(pin: DottedMapLib.Pin): DottedMapLib.Point;
-  getPoints(): DottedMapLib.Point[];
-  getSVG(settings: DottedMapLib.SvgSettings): string;
+  addPin(
+    pin: DottedMapWithoutCountriesLib.Pin,
+  ): DottedMapWithoutCountriesLib.Point;
+  getPoints(): DottedMapWithoutCountriesLib.Point[];
+  getSVG(settings: DottedMapWithoutCountriesLib.SvgSettings): string;
   image: {
     region: DottedMap.Region;
     width: number;
