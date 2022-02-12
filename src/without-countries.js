@@ -17,7 +17,7 @@ function DottedMapWithoutCountries({ map, avoidOuterPins = false }) {
 
   return {
     addPin({ lat, lng, data, svgOptions }) {
-      const pin = getPin({ lat, lng });
+      const pin = this.getPin({ lat, lng });
       const point = { ...pin, data, svgOptions };
 
       points[[x, y].join(';')] = point;
@@ -50,7 +50,10 @@ function DottedMapWithoutCountries({ map, avoidOuterPins = false }) {
       const [localLng, localLat] = proj4(
         proj4.defs('GOOGLE'),
         proj4.defs('WGS84'),
-        [localx, localy],
+        [
+          (localx * X_RANGE) / width + X_MIN,
+          Y_MAX - (localy * Y_RANGE) / height,
+        ],
       );
 
       const pin = { x: localx, y: localy, lat: localLat, lng: localLng };
