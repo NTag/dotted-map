@@ -20,7 +20,7 @@ function DottedMapWithoutCountries({ map, avoidOuterPins = false }) {
       const pin = this.getPin({ lat, lng });
       const point = { ...pin, data, svgOptions };
 
-      points[[x, y].join(';')] = point;
+      points[[point.x, point.y].join(';')] = point;
 
       return point;
     },
