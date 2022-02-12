@@ -17,6 +17,14 @@ function DottedMapWithoutCountries({ map, avoidOuterPins = false }) {
 
   return {
     addPin({ lat, lng, data, svgOptions }) {
+      const pin = getPin({ lat, lng });
+      const point = { ...pin, data, svgOptions };
+
+      points[[x, y].join(';')] = point;
+
+      return point;
+    },
+    getPin({ lat, lng }) {
       const [googleX, googleY] = proj4(proj4.defs('GOOGLE'), [lng, lat]);
       if (avoidOuterPins) {
         const wgs84Point = proj4(proj4.defs('GOOGLE'), proj4.defs('WGS84'), [
@@ -39,11 +47,15 @@ function DottedMapWithoutCountries({ map, avoidOuterPins = false }) {
         localx += 0.5;
       }
 
-      const point = { x: localx, y: localy, data, svgOptions };
+      const [localLng, localLat] = proj4(
+        proj4.defs('GOOGLE'),
+        proj4.defs('WGS84'),
+        [localx, localy],
+      );
 
-      points[[x, y].join(';')] = point;
+      const pin = { x: localx, y: localy, lat: localLat, lng: localLng };
 
-      return point;
+      return pin;
     },
     getPoints() {
       return Object.values(points);

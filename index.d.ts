@@ -38,6 +38,8 @@ namespace DottedMapLib {
   type Point = {
     x: number;
     y: number;
+    lat: number;
+    lng: number;
     data?: any;
     svgOptions?: SvgOptions;
   };
@@ -49,6 +51,7 @@ export default class DottedMap {
   constructor(settings: DottedMapLib.Settings);
 
   addPin(pin: DottedMapLib.Pin): DottedMapLib.Point;
+  getPin(pin: DottedMapLib.Pin): DottedMapLib.Point;
   getPoints(): DottedMapLib.Point[];
   getSVG(settings: DottedMapLib.SvgSettings): string;
   image: {

@@ -44,6 +44,8 @@ namespace DottedMapWithoutCountriesLib {
   type Point = {
     x: number;
     y: number;
+    lat: number;
+    lng: number;
     data?: any;
     svgOptions?: SvgOptions;
   };
@@ -53,6 +55,9 @@ export default class DottedMapWithoutCountries {
   constructor(settings: DottedMapWithoutCountriesLib.Settings);
 
   addPin(
+    pin: DottedMapWithoutCountriesLib.Pin,
+  ): DottedMapWithoutCountriesLib.Point;
+  getPin(
     pin: DottedMapWithoutCountriesLib.Pin,
   ): DottedMapWithoutCountriesLib.Point;
   getPoints(): DottedMapWithoutCountriesLib.Point[];
