@@ -9,7 +9,8 @@
   },
   "module": "./src/with-countries.js",
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "test": "node test.js"
   },
   "keywords": [
     "map",
