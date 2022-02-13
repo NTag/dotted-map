@@ -54,6 +54,8 @@ fs.writeFileSync('./map.svg', svgMap);
 
 If you use a large number of points (height or width ≥ 100), it may take a bit of time to compute the map (from 1 to 30 seconds depending on your device and number of points). This is why the result grid is cached. If you don’t change the parameters of `new DottedMap`, the next maps will be a lot faster to generate. You can however change the pins and the SVG options.
 
+It’s also possible to use it in **Leaflet**, see [an example here](https://github.com/NTag/colivings/blob/main/src/App.js).
+
 ### Precomputing the map
 
 Because the previous operation can be expansive (especially if you want to use DottedMap in a browser or React Native app), it’s possible to precompute the grid. You will still be able to add pins on-the-fly, in real time. This also allows you to import a lighter version of the library. This is especially useful if you always use the same map parameters, but only change the pins.
