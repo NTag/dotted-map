@@ -9,7 +9,7 @@
   },
   "module": "./src/with-countries.js",
   "scripts": {
-    "prepare": "npm run build",
+    "prepare": "NODE_OPTIONS=--openssl-legacy-provider npm run build",
     "build": "webpack",
     "test": "node test.js"
   },
