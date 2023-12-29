@@ -9,6 +9,7 @@
   },
   "module": "./src/with-countries.js",
   "scripts": {
+    "prepare": "npm run build",
     "build": "webpack",
     "test": "node test.js"
   },
