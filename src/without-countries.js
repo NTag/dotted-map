@@ -24,6 +24,16 @@ function DottedMapWithoutCountries({ map, avoidOuterPins = false }) {
 
       return point;
     },
+
+    addPoint({ x, y, data, svgOptions }) {
+      const key = [x, y].join(';');
+      const point = points[key];
+
+      if (point) {
+        points[key] = { ...point, data, svgOptions };
+      }
+    },
+
     getPin({ lat, lng }) {
       const [googleX, googleY] = proj4(proj4.defs('GOOGLE'), [lng, lat]);
       if (avoidOuterPins) {
