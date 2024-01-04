@@ -60,6 +60,10 @@ export default class DottedMapWithoutCountries {
   addPoint(
     point: Omit<DottedMapWithoutCountriesLib.Point, 'lat' | 'lng'>,
   ): void;
+  resetMap(
+    data: any,
+    svgOptions: DottedMapWithoutCountriesLib.SvgOptions,
+  ): void;
   getPin(
     pin: DottedMapWithoutCountriesLib.Pin,
   ): DottedMapWithoutCountriesLib.Point;
