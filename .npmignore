@@ -1,6 +1,22 @@
-*
-!dist/
-!package.json
-!README.md
-!LICENSE
-!CHANGELOG.md
+# Source and tests
+src/
+tests/
+
+# Config files
+biome.json
+tsconfig.json
+tsdown.config.ts
+vitest.config.ts
+lefthook.yml
+bun.lock
+CLAUDE.md
+
+# IDE and tooling
+.cursor/
+.github/
+
+# Generated files
+coverage/
+
+# Images (for README on GitHub only)
+images/
