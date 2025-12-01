@@ -43,6 +43,7 @@
     "@tsconfig/strictest": "^2.0.8",
     "@types/bun": "latest",
     "@vitest/coverage-v8": "4.0.14",
+    "lefthook": "^2.0.4",
     "tsdown": "^0.17.0-beta.4",
     "vitest": "^4.0.14"
   },
