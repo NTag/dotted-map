@@ -1,11 +1,11 @@
 import inside from "@turf/boolean-point-in-polygon";
 import type GeoJSON from "geojson";
 import proj4 from "proj4";
-import countries from "./countries.geo.json";
+import countries from "./countries";
 import type { Map, Point } from "./types";
 import DottedMapWithoutCountries from "./without-countries";
 
-const geojsonWorld = countries as GeoJSON.FeatureCollection;
+const geojsonWorld = countries;
 
 const geojsonByCountry = geojsonWorld.features.reduce(
   (countries, feature) => {
