@@ -42,6 +42,7 @@ export interface Pin {
   // biome-ignore lint/suspicious/noExplicitAny: allow
   data?: any;
   svgOptions?: SvgOptions;
+  attrs?: Record<string, string | number>;
 }
 
 export interface SvgSettings {
@@ -51,12 +52,7 @@ export interface SvgSettings {
   radius?: number;
 }
 
-export type Point = {
+export interface Point extends Pin {
   x: number;
   y: number;
-  lat: number;
-  lng: number;
-  // biome-ignore lint/suspicious/noExplicitAny: allow
-  data?: any;
-  svgOptions?: SvgOptions;
-};
+}

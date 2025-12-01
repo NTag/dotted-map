@@ -10,9 +10,9 @@ export interface DottedMapWithoutCountriesSettings {
 class DottedMapWithoutCountries {
   constructor(private readonly settings: DottedMapWithoutCountriesSettings) {}
 
-  addPin({ lat, lng, data, svgOptions }: Pin) {
-    const pin = this.getPin({ lat, lng });
-    const point = { ...pin, data, svgOptions };
+  addPin(options: Pin) {
+    const pin = this.getPin(options);
+    const point = { ...options, ...pin };
 
     this.settings.map.points[[point.x, point.y].join(";")] = point as Point;
 
@@ -80,12 +80,34 @@ class DottedMapWithoutCountries {
     backgroundColor = "transparent",
     radius = 0.5,
   }: SvgSettings) {
-    const getPoint = ({ x, y, svgOptions = {} }: Point): string => {
+    const getPoint = (point: Point): string => {
+      const { x, y, svgOptions = {} } = point;
       const pointRadius = svgOptions.radius || radius;
+
+      const attrs: Record<string, string | number | undefined> = {
+        fill: svgOptions.color || color,
+        ...point.attrs,
+      };
+
+      function render(
+        element: "circle" | "polyline",
+        attributes: Record<string, string | number>,
+      ) {
+        const attrs = Object.entries(attributes)
+          .filter(([_, value]) => value !== undefined)
+          .map(([key, value]) => `${key}="${value}"`)
+          .join(" ");
+
+        return `<${element} ${attrs} />`;
+      }
+
       if (shape === "circle") {
-        return `<circle cx="${x}" cy="${y}" r="${pointRadius}" fill="${
-          svgOptions.color || color
-        }" />`;
+        return render("circle", {
+          ...attrs,
+          cx: x,
+          cy: y,
+          r: pointRadius,
+        });
       } else if (shape === "hexagon") {
         const sqrt3radius = Math.sqrt(3) * pointRadius;
 
@@ -98,9 +120,11 @@ class DottedMapWithoutCountries {
           [x, y - 2 * pointRadius],
         ];
 
-        return `<polyline points="${polyPoints
-          .map((point) => point.join(","))
-          .join(" ")}" fill="${svgOptions.color || color}" />`;
+        return render("polyline", {
+          ...attrs,
+          points: polyPoints.map((point) => point.join(",")).join(" "),
+          fill: svgOptions.color || color,
+        });
       }
 
       return "";
