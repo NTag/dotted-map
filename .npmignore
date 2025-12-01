@@ -1,4 +1,6 @@
-images/
-test.js
-*.svg
-.prettierrc.json
+*
+!dist/
+!package.json
+!README.md
+!LICENSE
+!CHANGELOG.md
