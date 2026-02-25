@@ -48,8 +48,16 @@
     "countries",
     "country"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NTag/dotted-map.git"
+  },
   "author": "Basile Bruneau <basile@bruneau.email>",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NTag/dotted-map/issues"
+  },
+  "homepage": "https://github.com/NTag/dotted-map",
   "dependencies": {
     "@turf/boolean-point-in-polygon": "^7.3.4",
     "proj4": "^2.20.2"
