@@ -30,11 +30,13 @@ export default class DottedMapWithoutCountries {
   private height: number;
   private ystep: number;
   private avoidOuterPins: boolean;
+  private pins: Point[];
 
   public image: ImageInfo;
 
   constructor({ map, avoidOuterPins = false }: DottedMapWithoutCountriesSettings) {
     this.points = map.points;
+    this.pins = [];
     this.X_MIN = map.X_MIN;
     this.Y_MAX = map.Y_MAX;
     this.X_RANGE = map.X_RANGE;
@@ -56,7 +58,7 @@ export default class DottedMapWithoutCountries {
     const pin = this.getPin({ lat, lng });
     if (!pin) return undefined as unknown as Point;
     const point: Point = { ...pin, data, svgOptions };
-    this.points[[point.x, point.y].join(';')] = point;
+    this.pins.push(point);
     return point;
   }
 
@@ -91,7 +93,7 @@ export default class DottedMapWithoutCountries {
   }
 
   getPoints(): Point[] {
-    return Object.values(this.points);
+    return [...Object.values(this.points), ...this.pins];
   }
 
   getSVG({
@@ -127,6 +129,7 @@ export default class DottedMapWithoutCountries {
 
     return `<svg viewBox="0 0 ${this.width} ${this.height}" xmlns="http://www.w3.org/2000/svg" style="background-color: ${backgroundColor}">
         ${Object.values(this.points).map(getPoint).join('\n')}
+        ${this.pins.map(getPoint).join('\n')}
       </svg>`;
   }
 }

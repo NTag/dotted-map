@@ -100,6 +100,37 @@ const hexSvg = europeMap.getSVG({
 assert(hexSvg.includes('polyline'), 'Hexagon SVG should contain polyline elements');
 console.log('  PASS');
 
+// Test 9: Multiple pins at same location (issue #15)
+console.log('Test 9: Multiple pins at same location...');
+const multiPinMap = new DottedMap({ height: 70 });
+multiPinMap.addPin({
+  lat: 25.7617,
+  lng: -80.1918,
+  svgOptions: { color: 'rgba(229,38,40, 0.2)', radius: 1.5 },
+});
+multiPinMap.addPin({
+  lat: 25.7617,
+  lng: -80.1918,
+  svgOptions: { color: 'rgba(229,38,40, 0.5)', radius: 1.1 },
+});
+multiPinMap.addPin({
+  lat: 25.7617,
+  lng: -80.1918,
+  svgOptions: { color: '#E52628', radius: 0.55 },
+});
+const multiPinSvg = multiPinMap.getSVG({
+  radius: 0.22,
+  color: 'rgba(255,255,255, 0.6)',
+  shape: 'circle',
+});
+const pinMatches = multiPinSvg.match(/r="1\.5"/g);
+assert(pinMatches && pinMatches.length === 1, 'Should have 1 circle with r=1.5');
+const pinMatches2 = multiPinSvg.match(/r="1\.1"/g);
+assert(pinMatches2 && pinMatches2.length === 1, 'Should have 1 circle with r=1.1');
+const pinMatches3 = multiPinSvg.match(/r="0\.55"/g);
+assert(pinMatches3 && pinMatches3.length === 1, 'Should have 1 circle with r=0.55');
+console.log('  PASS');
+
 // Write a test SVG for visual inspection
 fs.writeFileSync('./test.svg', europeSvg);
 
