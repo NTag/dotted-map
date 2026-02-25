@@ -7,6 +7,8 @@
 
   <img src="https://raw.githubusercontent.com/NTag/dotted-map/master/images/world-diagonal-circle-dark.svg" width="100%" />
 
+  <img src="https://raw.githubusercontent.com/NTag/dotted-map/master/images/world-orthographic-circle-dark.svg" width="100%" />
+
   <img src="https://raw.githubusercontent.com/NTag/dotted-map/master/images/france-diagonal-hexagon-light.svg" height="150px" />
   <img src="https://raw.githubusercontent.com/NTag/dotted-map/master/images/italy-diagonal-hexagon-light.svg" height="150px" />
   <img src="https://raw.githubusercontent.com/NTag/dotted-map/master/images/uk-diagonal-hexagon-light.svg" height="150px" />
@@ -124,9 +126,10 @@ import DottedMap from 'dotted-map';
 const map = new DottedMap({
   height,
   width, // just specify either height or width, so the ratio of the map is correct
-  countries: ['FRA'] // look into `countries.geo.json` to see which keys to use. You can also omit this parameter and the whole world will be used
+  countries: [‘FRA’] // look into `countries.geo.json` to see which keys to use. You can also omit this parameter and the whole world will be used
   region: { lat: { min, max }, lng: { min, max } }, // if not present, it will fit the countries (and if no country is specified, the whole world)
-  grid: 'vertical' | 'diagonal', // how points should be aligned
+  grid: ‘vertical’ | ‘diagonal’, // how points should be aligned
+  projection: { name, center }, // optional, see below
   avoidOuterPins: false | true, // if it’s true, prevent adding pins when they are outside of region/countries
 });
 
@@ -151,6 +154,39 @@ map.getSVG({
 });
 // <svg><circle … /><circle …></svg>
 ```
+
+### Projection
+
+By default, the map uses the Mercator projection. You can optionally pass a `projection` parameter to use a different one:
+
+```js
+const map = new DottedMap({
+  height: 60,
+  grid: 'diagonal',
+  projection: { name: 'robinson' },
+});
+```
+
+Available projections: `mercator` (default), `equirectangular`, `robinson`, `equalEarth`, `mollweide`, `miller`, `sinusoidal`, `orthographic`, `gallPeters`, `vanDerGrinten`.
+
+You can also pass a `center` to shift the map's center point. This is especially useful for `orthographic` (which shows a single hemisphere) but works with any projection:
+
+```js
+// Orthographic projection centered on North America
+const map = new DottedMap({
+  height: 60,
+  grid: 'diagonal',
+  projection: { name: 'orthographic', center: { lat: 40, lng: -100 } },
+});
+
+// Robinson projection centered on the Pacific
+const map = new DottedMap({
+  height: 60,
+  projection: { name: 'robinson', center: { lat: 0, lng: 150 } },
+});
+```
+
+Note: for `orthographic`, pins on the back side of the globe (not visible) will be ignored.
 
 ## Acknowledgments
 

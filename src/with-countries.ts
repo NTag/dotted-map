@@ -3,10 +3,43 @@ import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import type { MultiPolygon } from 'geojson';
 import geojsonWorld from './countries.geo.json';
 import DottedMapWithoutCountries from './without-countries';
-import type { DottedMapSettings, MapSettings, MapData, Region, Point } from './types';
+import type {
+  DottedMapSettings,
+  MapSettings,
+  MapData,
+  Region,
+  Point,
+  Projection,
+  ProjectionName,
+} from './types';
 
-export type { DottedMapSettings, MapSettings, Region, Point };
+export type { DottedMapSettings, MapSettings, Region, Point, Projection, ProjectionName };
 export { DottedMapWithoutCountries };
+
+const PROJECTIONS: Record<ProjectionName, string> = {
+  mercator: '+proj=merc +lon_0={lng} +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  equirectangular: '+proj=eqc +lon_0={lng} +lat_ts=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  robinson: '+proj=robin +lon_0={lng} +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  equalEarth: '+proj=eqearth +lon_0={lng} +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  mollweide: '+proj=moll +lon_0={lng} +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  miller: '+proj=mill +lon_0={lng} +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  sinusoidal: '+proj=sinu +lon_0={lng} +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  orthographic: '+proj=ortho +lat_0={lat} +lon_0={lng} +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  gallPeters: '+proj=cea +lon_0={lng} +lat_ts=45 +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  vanDerGrinten: '+proj=vandg +lon_0={lng} +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+};
+
+const DEFAULT_PROJECTION: Projection = { name: 'mercator' };
+
+const getProj4String = (projection: Projection = DEFAULT_PROJECTION): string => {
+  const template = PROJECTIONS[projection.name];
+  const lat = projection.center?.lat ?? 0;
+  const lng = projection.center?.lng ?? 0;
+  return template.replace('{lat}', String(lat)).replace('{lng}', String(lng));
+};
+
+const isFinitePoint = (point: number[]): boolean =>
+  point.every((v) => Number.isFinite(v));
 
 interface GeoJSONFeature {
   type: 'Feature';
@@ -60,7 +93,7 @@ const CACHE: Record<string, MapData> = {};
 
 const DEFAULT_WORLD_REGION: Region = {
   lat: { min: -56, max: 71 },
-  lng: { min: -179, max: 179 },
+  lng: { min: -168, max: 168 },
 };
 
 const computeGeojsonBox = (geojson: GeoJSONGeometry): Region => {
@@ -117,10 +150,13 @@ const getMap = ({
   countries = [] as string[],
   region,
   grid = 'vertical' as const,
+  projection = DEFAULT_PROJECTION,
 }: MapSettings): MapData => {
   if (height <= 0 && width <= 0) {
     throw new Error('height or width is required');
   }
+
+  const proj4String = getProj4String(projection);
 
   let geojson: GeoJSONFeatureCollection = typedWorld;
   let resolvedRegion = region;
@@ -139,14 +175,47 @@ const getMap = ({
 
   const poly = geojsonToMultiPolygons(geojson);
 
-  const [X_MIN, Y_MIN] = proj4('GOOGLE', [
-    resolvedRegion!.lng.min,
-    resolvedRegion!.lat.min,
-  ]);
-  const [X_MAX, Y_MAX] = proj4('GOOGLE', [
-    resolvedRegion!.lng.max,
-    resolvedRegion!.lat.max,
-  ]);
+  // Compute projected bounding box by sampling many points along the
+  // region boundary and interior. This is necessary because some
+  // projections (e.g., orthographic) can't project all corners.
+  const SAMPLES = 100;
+  const r = resolvedRegion!;
+  let X_MIN = Infinity;
+  let Y_MIN = Infinity;
+  let X_MAX = -Infinity;
+  let Y_MAX = -Infinity;
+
+  for (let i = 0; i <= SAMPLES; i++) {
+    const frac = i / SAMPLES;
+    const sampleLat = r.lat.min + frac * (r.lat.max - r.lat.min);
+    const sampleLng = r.lng.min + frac * (r.lng.max - r.lng.min);
+
+    // Sample boundary edges and a center row/column
+    const candidates: [number, number][] = [
+      [sampleLng, r.lat.min], // bottom edge
+      [sampleLng, r.lat.max], // top edge
+      [r.lng.min, sampleLat], // left edge
+      [r.lng.max, sampleLat], // right edge
+      [sampleLng, sampleLat], // diagonal through interior
+    ];
+
+    for (const point of candidates) {
+      const [px, py] = proj4(proj4String, point);
+      if (Number.isFinite(px) && Number.isFinite(py)) {
+        X_MIN = Math.min(X_MIN, px);
+        Y_MIN = Math.min(Y_MIN, py);
+        X_MAX = Math.max(X_MAX, px);
+        Y_MAX = Math.max(Y_MAX, py);
+      }
+    }
+  }
+
+  if (!Number.isFinite(X_MIN)) {
+    throw new Error(
+      'No valid projected points found for the given region and projection',
+    );
+  }
+
   const X_RANGE = X_MAX - X_MIN;
   const Y_RANGE = Y_MAX - Y_MIN;
 
@@ -164,20 +233,23 @@ const getMap = ({
       const localx = y % 2 === 0 && grid === 'diagonal' ? x + 0.5 : x;
       const localy = y * ystep;
 
-      const pointGoogle: [number, number] = [
+      const projected: [number, number] = [
         (localx / width) * X_RANGE + X_MIN,
         Y_MAX - (localy / height) * Y_RANGE,
       ];
-      const wgs84Point = proj4('GOOGLE', 'WGS84', pointGoogle);
+      const wgs84Point = proj4(proj4String, 'WGS84', projected);
 
       if (
-        booleanPointInPolygon(
+        !isFinitePoint(wgs84Point) ||
+        !booleanPointInPolygon(
           wgs84Point as [number, number],
           poly as { type: 'Feature'; properties: object; geometry: MultiPolygon },
         )
       ) {
-        points[[x, y].join(';')] = { x: localx, y: localy };
+        continue;
       }
+
+      points[[x, y].join(';')] = { x: localx, y: localy };
     }
   }
 
@@ -194,6 +266,7 @@ const getMap = ({
     height,
     width,
     ystep,
+    projection,
   };
 };
 
@@ -206,6 +279,7 @@ const getCacheKey = ({
   countries = [] as string[],
   region,
   grid = 'vertical',
+  projection = DEFAULT_PROJECTION,
 }: MapSettings): string => {
   return [
     JSON.stringify(region),
@@ -213,6 +287,7 @@ const getCacheKey = ({
     height,
     width,
     JSON.stringify(countries),
+    JSON.stringify(projection),
   ].join(' ');
 };
 

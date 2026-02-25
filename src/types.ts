@@ -1,3 +1,20 @@
+export type ProjectionName =
+  | 'mercator'
+  | 'equirectangular'
+  | 'robinson'
+  | 'equalEarth'
+  | 'mollweide'
+  | 'miller'
+  | 'sinusoidal'
+  | 'orthographic'
+  | 'gallPeters'
+  | 'vanDerGrinten';
+
+export interface Projection {
+  name: ProjectionName;
+  center?: { lat: number; lng: number };
+}
+
 export interface Region {
   lat: { min: number; max: number };
   lng: { min: number; max: number };
@@ -9,6 +26,7 @@ export interface MapSettings {
   countries?: string[];
   region?: Region;
   grid?: 'vertical' | 'diagonal';
+  projection?: Projection;
 }
 
 export interface DottedMapSettings extends MapSettings {
@@ -61,6 +79,7 @@ export interface MapData {
   height: number;
   width: number;
   ystep: number;
+  projection?: Projection;
 }
 
 export interface ImageInfo {

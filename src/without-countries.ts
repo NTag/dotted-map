@@ -7,6 +7,8 @@ import type {
   ImageInfo,
   MapData,
   Region,
+  Projection,
+  ProjectionName,
 } from './types';
 
 export type {
@@ -17,6 +19,30 @@ export type {
   ImageInfo,
   MapData,
   Region,
+  Projection,
+  ProjectionName,
+};
+
+const PROJECTIONS: Record<ProjectionName, string> = {
+  mercator: '+proj=merc +lon_0={lng} +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  equirectangular: '+proj=eqc +lon_0={lng} +lat_ts=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  robinson: '+proj=robin +lon_0={lng} +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  equalEarth: '+proj=eqearth +lon_0={lng} +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  mollweide: '+proj=moll +lon_0={lng} +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  miller: '+proj=mill +lon_0={lng} +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  sinusoidal: '+proj=sinu +lon_0={lng} +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  orthographic: '+proj=ortho +lat_0={lat} +lon_0={lng} +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  gallPeters: '+proj=cea +lon_0={lng} +lat_ts=45 +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+  vanDerGrinten: '+proj=vandg +lon_0={lng} +x_0=0 +y_0=0 +datum=WGS84 +units=m',
+};
+
+const DEFAULT_PROJECTION: Projection = { name: 'mercator' };
+
+const getProj4String = (projection: Projection = DEFAULT_PROJECTION): string => {
+  const template = PROJECTIONS[projection.name];
+  const lat = projection.center?.lat ?? 0;
+  const lng = projection.center?.lng ?? 0;
+  return template.replace('{lat}', String(lat)).replace('{lng}', String(lng));
 };
 
 export default class DottedMapWithoutCountries {
@@ -31,6 +57,7 @@ export default class DottedMapWithoutCountries {
   private ystep: number;
   private avoidOuterPins: boolean;
   private pins: Point[];
+  private proj4String: string;
 
   public image: ImageInfo;
 
@@ -46,6 +73,7 @@ export default class DottedMapWithoutCountries {
     this.height = map.height;
     this.ystep = map.ystep;
     this.avoidOuterPins = avoidOuterPins;
+    this.proj4String = getProj4String(map.projection ?? DEFAULT_PROJECTION);
 
     this.image = {
       region: map.region,
@@ -63,7 +91,12 @@ export default class DottedMapWithoutCountries {
   }
 
   getPin({ lat, lng }: { lat: number; lng: number }): Point | undefined {
-    const [googleX, googleY] = proj4('GOOGLE', [lng, lat]);
+    const projected = proj4(this.proj4String, [lng, lat]);
+    if (!projected.every((v: number) => Number.isFinite(v))) {
+      return undefined;
+    }
+
+    const [projX, projY] = projected;
     if (this.avoidOuterPins) {
       // avoidOuterPins requires polygon data which is only available
       // via the with-countries entry point. In the original code, this
@@ -71,8 +104,8 @@ export default class DottedMapWithoutCountries {
       return undefined;
     }
 
-    let rawX = (this.width * (googleX - this.X_MIN)) / this.X_RANGE;
-    const rawY = (this.height * (this.Y_MAX - googleY)) / this.Y_RANGE;
+    let rawX = (this.width * (projX - this.X_MIN)) / this.X_RANGE;
+    const rawY = (this.height * (this.Y_MAX - projY)) / this.Y_RANGE;
     const y = Math.round(rawY / this.ystep);
     if (y % 2 === 0 && this.grid === 'diagonal') {
       rawX -= 0.5;
@@ -84,11 +117,15 @@ export default class DottedMapWithoutCountries {
       localx += 0.5;
     }
 
-    const [localLng, localLat] = proj4('GOOGLE', 'WGS84', [
+    const inverse = proj4(this.proj4String, 'WGS84', [
       (localx * this.X_RANGE) / this.width + this.X_MIN,
       this.Y_MAX - (localy * this.Y_RANGE) / this.height,
     ]);
+    if (!inverse.every((v: number) => Number.isFinite(v))) {
+      return undefined;
+    }
 
+    const [localLng, localLat] = inverse;
     return { x: localx, y: localy, lat: localLat, lng: localLng };
   }
 
