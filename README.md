@@ -7,7 +7,7 @@
 
   <img src="https://raw.githubusercontent.com/NTag/dotted-map/master/images/world-diagonal-circle-dark.svg" width="100%" />
 
-  <img src="https://raw.githubusercontent.com/NTag/dotted-map/master/images/world-orthographic-circle-dark.svg" width="100%" />
+  <img src="https://raw.githubusercontent.com/NTag/dotted-map/master/images/world-orthographic-circle-dark.svg" width="45%" />
 
   <img src="https://raw.githubusercontent.com/NTag/dotted-map/master/images/france-diagonal-hexagon-light.svg" height="150px" />
   <img src="https://raw.githubusercontent.com/NTag/dotted-map/master/images/italy-diagonal-hexagon-light.svg" height="150px" />
