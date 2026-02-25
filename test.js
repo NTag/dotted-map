@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import fs from 'node:fs';
-import DottedMap, { getMapJSON } from './dist/index.js';
-import DottedMapWithoutCountries from './dist/without-countries.js';
+import DottedMap, { getMapJSON } from 'dotted-map';
+import DottedMapWithoutCountries from 'dotted-map/without-countries';
 
 // Test 1: Basic world map creation
 console.log('Test 1: Basic world map creation...');

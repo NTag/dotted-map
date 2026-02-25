@@ -1,13 +1,11 @@
-import { defineConfig } from 'tsup';
+import { defineConfig } from 'tsdown';
 
 export default defineConfig({
   entry: {
     index: 'src/with-countries.ts',
     'without-countries': 'src/without-countries.ts',
   },
-  format: ['cjs', 'esm'],
+  format: ['esm', 'cjs'],
   dts: true,
-  clean: true,
-  outDir: 'dist',
   external: ['proj4', '@turf/boolean-point-in-polygon'],
 });
