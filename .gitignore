@@ -1,4 +1,4 @@
 node_modules/
+dist/
 *.svg
-/index.js
-/without-countries.js
+.claude/

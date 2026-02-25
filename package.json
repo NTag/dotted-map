@@ -1,15 +1,42 @@
 {
   "name": "dotted-map",
-  "version": "2.2.3",
+  "version": "3.0.0",
   "description": "Create a SVG map filled with dots for the world or countries",
-  "main": "./index.js",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./index.js",
-    "./without-countries": "./without-countries.js"
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./without-countries": {
+      "import": {
+        "types": "./dist/without-countries.d.ts",
+        "default": "./dist/without-countries.js"
+      },
+      "require": {
+        "types": "./dist/without-countries.d.cts",
+        "default": "./dist/without-countries.cjs"
+      }
+    }
   },
-  "module": "./src/with-countries.js",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "build": "webpack",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
     "test": "node test.js"
   },
   "keywords": [
@@ -24,13 +51,13 @@
   "author": "Basile Bruneau <basile@bruneau.email>",
   "license": "MIT",
   "dependencies": {
-    "@turf/boolean-point-in-polygon": "^6.0.1",
-    "proj4": "^2.6.1"
+    "@turf/boolean-point-in-polygon": "^7.3.4",
+    "proj4": "^2.20.2"
   },
   "devDependencies": {
-    "prettier": "^2.0.5",
-    "webpack": "^5.33.2",
-    "webpack-cli": "^4.6.0"
+    "prettier": "^3.8.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
   },
   "sideEffects": false
 }

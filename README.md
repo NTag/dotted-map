@@ -16,7 +16,7 @@
 
 ## Installation
 
-Requires NodeJS ≥ 13.
+Requires NodeJS ≥ 18.
 
 ```bash
 npm i dotted-map
@@ -25,9 +25,8 @@ npm i dotted-map
 ## Usage
 
 ```js
-const fs = require('fs');
-const DottedMap = require('dotted-map').default;
-// Or in the browser: import DottedMap from 'dotted-map';
+import fs from 'fs';
+import DottedMap from 'dotted-map';
 
 const map = new DottedMap({ height: 60, grid: 'diagonal' });
 
@@ -62,7 +61,7 @@ Because the previous operation can be expansive (especially if you want to use D
 
 ```js
 // So you do this first step only once, when developing your app
-const getMapJSON = require('dotted-map').getMapJSON;
+import { getMapJSON } from 'dotted-map';
 
 // This function accepts the same arguments as DottedMap in the example above.
 const mapJsonString = getMapJSON({ height: 60, grid: 'diagonal' });
