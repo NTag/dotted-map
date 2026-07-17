@@ -9,6 +9,7 @@ import type {
   Region,
   Projection,
   ProjectionName,
+  SvgOptions,
 } from './types';
 
 export type {
@@ -133,6 +134,15 @@ export default class DottedMapWithoutCountries {
     return [...Object.values(this.points), ...this.pins];
   }
 
+  getAttributes(svgOptions: SvgOptions): string {
+    if (!svgOptions.attributes) {
+      return '';
+    }
+    return Object.entries(svgOptions.attributes)
+      .map(([key, value]) => `${key}="${value}"`)
+      .join(' ');
+  } 
+
   getSVG({
     shape = 'circle',
     color = 'current',
@@ -141,10 +151,11 @@ export default class DottedMapWithoutCountries {
   }: SvgSettings = {}): string {
     const getPoint = ({ x, y, svgOptions = {} }: Point): string => {
       const pointRadius = svgOptions.radius || radius;
+      const attributes = this.getAttributes(svgOptions);
       if (shape === 'circle') {
         return `<circle cx="${x}" cy="${y}" r="${pointRadius}" fill="${
           svgOptions.color || color
-        }" />`;
+        }" ${attributes} />`;
       } else if (shape === 'hexagon') {
         const sqrt3radius = Math.sqrt(3) * pointRadius;
 
@@ -159,7 +170,7 @@ export default class DottedMapWithoutCountries {
 
         return `<polyline points="${polyPoints
           .map((point) => point.join(','))
-          .join(' ')}" fill="${svgOptions.color || color}" />`;
+        }" fill="${svgOptions.color || color}" ${attributes} />`;
       }
       return '';
     };
