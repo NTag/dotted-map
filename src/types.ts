@@ -41,6 +41,7 @@ export interface DottedMapWithoutCountriesSettings {
 export interface SvgOptions {
   color?: string;
   radius?: number;
+  attributes?: { [key: string]: string };
 }
 
 export interface PinInput {
